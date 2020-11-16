@@ -74,7 +74,7 @@ public class Client extends Thread {
             case "round":
                 if (this.newRound == null) return;
                 String[] host = dataCommand.split(";");
-                this.newRound.event(host[0], Integer.parseInt(host[1]), Boolean.parseBoolean(host[2]));
+                this.newRound.event(host[0], Integer.parseInt(host[1]));
                 break;
             case "finish":
                 if (this.finishRound == null) return;

@@ -1,7 +1,8 @@
-package com.questions.game.host.questions;
+package com.questions.game.host.parser;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
+import com.questions.game.host.questionnaire.Question;
 
 import java.io.*;
 import java.util.ArrayList;

@@ -66,7 +66,7 @@ public class ClientController {
         Console.writer.println(win ? "You have won, Congratulations!!!" : "You lost, nice try");
     }
 
-    private void newRound(String host, Integer port, boolean me) {
+    private void newRound(String host, Integer port) {
         try { client.close(); }
         catch (ClientError clientError) {
             Console.writer.println("failed to close client: " + clientError.getMessage());

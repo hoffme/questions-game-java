@@ -1,60 +1,61 @@
 package com.questions.game.host.questionnaire;
 
 import com.questions.game.host.events.EventWinner;
-import com.questions.game.host.peer.Peer;
-import com.questions.game.host.questions.Question;
-
 import java.util.*;
 
 public class Questionnaire {
 
     private final List<Question> questions;
-    private final Map<Peer, List<Answer>> answersCorrect;
-    private final Set<Peer> peersResponse;
-    private final EventWinner event;
+    private final Map<String, List<Answer>> answers;
+    private final Set<String> peersResponse;
+
     private final int pointsToWin;
 
     private int indexQuestion;
     private boolean open;
 
-    public Questionnaire(List<Question> questions, EventWinner eventWinner) {
+    public EventWinner eventWinner;
+
+    public Questionnaire(List<Question> questions) {
         this.questions = questions;
-        this.answersCorrect = new HashMap<>();
+        this.answers = new HashMap<>();
         this.peersResponse = new HashSet<>();
-        this.event = eventWinner;
+
         this.pointsToWin = 5;
         this.indexQuestion = -1;
         this.open = false;
     }
 
-    public Question getQuestion() {
-        return this.questions.get(this.indexQuestion);
-    }
+    public Question getQuestion() { return this.questions.get(this.indexQuestion); }
 
     public void open() { this.open = true; }
 
     public void close() { this.open = false; }
 
-    public void next() {
+    public boolean next() {
+        if (this.indexQuestion >= this.questions.size()) {
+            return false;
+        }
         this.indexQuestion++;
         this.peersResponse.clear();
+        return true;
     }
 
-    public Answer answer(int questionID, Peer peer, String answerString) {
+    public Answer answer(int questionID, String peer, String answerString) {
         Answer answer = new Answer(this.getQuestion(questionID), answerString, peer);
         this.peersResponse.add(peer);
 
-        if (!this.answersCorrect.containsKey(peer)) this.answersCorrect.put(peer, new ArrayList<>());
-        this.answersCorrect.get(peer).add(answer);
+        if (!this.answers.containsKey(peer)) this.answers.put(peer, new ArrayList<>());
+        this.answers.get(peer).add(answer);
 
-        if (this.answersCorrect.get(peer).size() >= this.pointsToWin) {
-            this.event.win(peer, this.answersCorrect.get(peer));
+        if (this.answers.get(peer).size() >= this.pointsToWin) {
+            this.eventWinner.win(peer, this.answers.get(peer));
         }
 
         return answer;
     }
 
-    public Set<Peer> getPeersResponse() { return this.peersResponse; }
+    public Set<String> getPeersResponse() { return this.peersResponse; }
 
     public Question getQuestion(int questionID) {
         for (Question question: this.questions) {
@@ -65,5 +66,7 @@ public class Questionnaire {
 
     public boolean isOpen() { return this.open; }
 
-    public Question actualQuestion() { return this.questions.get(this.indexQuestion); }
+    public Question actualQuestion() {
+        return this.questions.get(this.indexQuestion);
+    }
 }

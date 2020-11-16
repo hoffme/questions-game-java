@@ -1,4 +1,4 @@
-package com.questions.game.host.questions;
+package com.questions.game.host.questionnaire;
 
 public class Question {
 
@@ -14,7 +14,7 @@ public class Question {
         this.correctAnswer = correctAnswer;
     }
 
-    public boolean isCorrect(String answer) {
+    public boolean correct(String answer) {
         return this.correctAnswer.equals(answer);
     }
 }

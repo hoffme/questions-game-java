@@ -10,6 +10,7 @@ import java.util.List;
 public class HostController {
 
     public EventChangeMode changeMode;
+
     private HostConfig config = new HostConfig();
 
     public void start() {
@@ -31,13 +32,15 @@ public class HostController {
 
     private void startHost() {
         Host round;
-        try { round = new Host(this.config, this::winner); }
+        try { round = new Host(this.config); }
         catch (HostError e) {
             Console.writer.println(e);
             return;
         }
 
-        Console.writer.println("round started");
+        round.eventWinner = this::winner;
+        round.eventNewAnswer = this::newAnswer;
+        round.eventNewPeer = this::newPeer;
 
         round.start();
         Console.writer.println("waiting the peers");
@@ -49,7 +52,18 @@ public class HostController {
         catch (InterruptedException e) { e.printStackTrace(); }
     }
 
-    private void winner(Peer peer, List<Answer> answers) {
+    private void newPeer(Peer peer) {
+        Console.writer.println("new peer connected: " + peer.username);
+    }
 
+    private void newAnswer(Answer answer) {
+        Console.writer.println("new answer:\n");
+        Console.writer.println("\tquestionId: " + answer.getQuestion().id);
+        Console.writer.println("\tfrom: " + answer.getPeer());
+        Console.writer.println("\tanswer: " + answer.getAnswer());
+    }
+
+    private void winner(String peer, List<Answer> answers) {
+        Console.writer.println("have a winner: " + peer);
     }
 }

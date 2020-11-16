@@ -1,8 +1,8 @@
 package com.questions.game.host;
 
 import com.questions.console.Console;
-import com.questions.game.host.questions.Loader;
-import com.questions.game.host.questions.Question;
+import com.questions.game.host.parser.Loader;
+import com.questions.game.host.questionnaire.Question;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -30,7 +30,7 @@ public class HostConfig {
         input = Console.input("> host "+defaultHost+": ");
         if (input.length() > 0) this.host = input;
 
-        String defaultPort = (this.port > 0) ? "[" + String.valueOf(this.port) + "]" : "";
+        String defaultPort = (this.port > 0) ? "[" + this.port + "]" : "";
         inputInt = Console.inputInt("> port "+defaultPort+": ");
         if (inputInt > 0) this.port = inputInt;
     }
