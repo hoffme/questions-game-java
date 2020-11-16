@@ -1,6 +1,7 @@
-package game.host;
+package com.questions.game.host.questionnaire;
 
-import game.questions.Question;
+import com.questions.game.host.peer.Peer;
+import com.questions.game.host.questions.Question;
 
 public class Answer {
 
@@ -24,5 +25,9 @@ public class Answer {
 
     public Peer getPeer() {
         return peer;
+    }
+
+    public boolean correct() {
+        return this.question.isCorrect(this.answer);
     }
 }

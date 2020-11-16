@@ -1,4 +1,4 @@
-package game.questions;
+package com.questions.game.host.questions;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
@@ -19,6 +19,7 @@ public class Loader {
             JsonObject questObj = questionElement.getAsJsonObject();
 
             Question question = new Question(
+                    questObj.get("id").getAsInt(),
                     questObj.get("question").getAsString(),
                     questObj.get("type").getAsString(),
                     questObj.get("answer").getAsString()
