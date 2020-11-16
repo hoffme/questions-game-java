@@ -61,25 +61,25 @@ public class Client extends Thread {
 
     private void newCommand(String typeCommand, String dataCommand) {
         switch (typeCommand) {
-            case ("question") -> {
+            case "question":
                 if (this.newQuestion == null) return;
                 String[] question = dataCommand.split(";");
                 this.newQuestion.event(Integer.parseInt(question[0]), question[1], question[2]);
-            }
-            case ("result") -> {
+                break;
+            case "result":
                 if (this.result == null) return;
                 String[] result = dataCommand.split(";");
                 this.result.event(Boolean.parseBoolean(result[0]), result[1], result[2]);
-            }
-            case ("round") -> {
+                break;
+            case "round":
                 if (this.newRound == null) return;
                 String[] host = dataCommand.split(";");
                 this.newRound.event(host[0], Integer.parseInt(host[1]), Boolean.parseBoolean(host[2]));
-            }
-            case ("finish") -> {
+                break;
+            case "finish":
                 if (this.finishRound == null) return;
                 this.finishRound.event(Boolean.parseBoolean(dataCommand));
-            }
+                break;
         }
     }
 

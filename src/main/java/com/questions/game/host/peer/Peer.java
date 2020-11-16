@@ -29,7 +29,7 @@ public class Peer extends Thread {
     }
 
     private String register() throws PeerError {
-        String username = "";
+        String username;
         try { username = this.reader.readLine(); }
         catch (IOException e) {
             throw new PeerError("error on register peer " + e.getMessage());
@@ -60,13 +60,15 @@ public class Peer extends Thread {
 
     private void newCommand(String typeCommand, String dataCommand) {
         switch (typeCommand) {
-            case ("answer") -> {
+            case "answer":
                 String[] answer = dataCommand.split(";", 2);
                 this.eventAnswer.newAnswer(this, Integer.parseInt(answer[0]), answer[1]);
-            }
-            case ("host") -> {
-                String[] host = dataCommand.split(";", 2);
-            }
+                break;
+            case "host":
+                //String[] host = dataCommand.split(";", 2);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + typeCommand);
         }
     }
 
