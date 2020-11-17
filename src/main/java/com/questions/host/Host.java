@@ -1,12 +1,12 @@
 package com.questions.host;
 
 import com.questions.game.Commands;
-import com.questions.host.events.EventNewAnswer;
-import com.questions.host.events.EventNewPeer;
-import com.questions.host.events.EventWinner;
+import com.questions.game.Commands.*;
+import com.questions.host.peer.EventsPeer;
 import com.questions.host.questionnaire.Answer;
 import com.questions.host.peer.Peer;
 import com.questions.host.questionnaire.Questionnaire;
+import com.questions.host.questionnaire.QuestionnaireEvents;
 import com.questions.utils.Connection;
 
 import java.io.IOException;
@@ -15,26 +15,23 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.List;
 
-public class Host extends Thread {
+public class Host extends Thread implements EventsPeer, QuestionnaireEvents {
 
     private final HostConfig config;
 
     private final HashMap<String, Peer> peers;
     private final Questionnaire questionnaire;
+    private final EventsHost events;
 
     private boolean stateRegister;
 
-    public EventWinner eventWinner;
-    public EventNewPeer eventNewPeer;
-    public EventNewAnswer eventNewAnswer;
-
-    public Host(HostConfig config) {
+    public Host(HostConfig config, EventsHost events) {
+        this.events = events;
         this.config = config;
 
-        this.questionnaire = new Questionnaire(config.getQuestions());
-        this.questionnaire.eventWinner = this::winner;
-
         this.peers = new HashMap<>();
+
+        this.questionnaire = new Questionnaire(config.getQuestions(), this);
 
         this.stateRegister = true;
     }
@@ -46,43 +43,30 @@ public class Host extends Thread {
         try {
             ServerSocket server = new ServerSocket(this.config.getPort());
             while (this.stateRegister) {
-                this.waitAndRegister(server);
+                Socket sock = server.accept();
+                if (!this.stateRegister) return;
+
+                this.register(sock);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
-    private void waitAndRegister(ServerSocket server) throws IOException {
-        Socket sock = server.accept();
-        if (!this.stateRegister) return;
+    private void register(Socket socket) throws IOException {
+        Connection conn = new Connection(socket);
 
-        Connection conn = new Connection(sock);
+        Credentials credentials = Credentials.parseFrom(conn.receive());
 
-        Commands.Credentials credentials = Commands.Credentials.parseFrom(conn.receive());
+        boolean validRegister = !this.peers.containsKey(credentials.getUsername());
 
-        String err = "";
-        if (this.peers.containsKey(credentials.getUsername())) {
-            err = "username already register";
-        }
-
-        Commands.CredentialsResponse response = Commands.CredentialsResponse.newBuilder()
-                .setError(err)
+        CredentialsResponse response = CredentialsResponse.newBuilder()
+                .setError(validRegister ? "" : "username already register")
                 .build();
         conn.send(response.toByteArray());
 
-        Peer peer = new Peer(conn, credentials.getUsername());
-        peer.eventAnswer = this::newAnswer;
-        peer.eventHostRound = this::hostRound;
+        Peer peer = new Peer(conn, credentials.getUsername(), this);
 
         this.peers.put(credentials.getUsername(), peer);
-        if (this.eventNewPeer != null) this.eventNewPeer.event(peer);
-    }
-
-    private void hostRound(String host, Integer port) {
-        for (Peer peer: this.peers.values()) {
-            peer.sendNewHostRound(host, port);
-        }
+        this.events.peerConnection(peer);
     }
 
     public void startRound() {
@@ -91,7 +75,8 @@ public class Host extends Thread {
     }
 
     private void sendNewQuestion() {
-        this.questionnaire.next();
+        if (!this.questionnaire.next()) return;
+
         this.questionnaire.open();
 
         for (Peer peer: this.peers.values()) {
@@ -99,14 +84,30 @@ public class Host extends Thread {
         }
     }
 
-    private void newAnswer(Peer peer, int questionID, String answerString) {
-        Answer answer = this.questionnaire.answer(questionID, peer.username, answerString);
+    private void sendResults(Peer peerResponse, Answer answer) {
+        this.questionnaire.close();
 
-        boolean answerActualQuestion = this.questionnaire.actualQuestion().id == questionID;
+        for (Peer peer: this.peers.values()) {
+            boolean responseCorrect = false;
+            if (peer == peerResponse) responseCorrect = true;
+            peer.sendResults(answer, responseCorrect, peerResponse.username);
+        }
+    }
+
+    @Override
+    public void winner(String peer, List<Answer> answers) {
+        events.winner(this.peers.get(peer), answers);
+    }
+
+    @Override
+    public void answer(Peer peer, Commands.Answer answerCmd) {
+        Answer answer = this.questionnaire.answer(answerCmd.getQuestionId(), peer.username, answerCmd.getAnswer());
+
+        boolean answerActualQuestion = this.questionnaire.actualQuestion().id == answerCmd.getQuestionId();
         boolean answerLater = !this.questionnaire.isOpen();
         boolean answerCorrect = answer.correct();
 
-        if (this.eventNewAnswer != null) this.eventNewAnswer.event(answer);
+        this.events.answer(answer);
 
         if (answerActualQuestion && !answerLater && answerCorrect) {
             this.sendResults(peer, answer);
@@ -114,17 +115,10 @@ public class Host extends Thread {
         }
     }
 
-    private void sendResults(Peer peerResponse, Answer answer) {
-        this.questionnaire.close();
-
+    @Override
+    public void changeRound(Peer peerHost, ChangeHostRound changeRound) {
         for (Peer peer: this.peers.values()) {
-            boolean win = false;
-            if (peer == peerResponse) win = true;
-            peer.sendResults(answer, win, peerResponse.username);
+            peer.sendNewHostRound(changeRound.getHost(), changeRound.getPort());
         }
-    }
-
-    public void winner(String peer, List<Answer> answers) {
-        this.eventWinner.win(peer, answers);
     }
 }

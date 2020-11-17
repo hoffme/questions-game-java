@@ -6,7 +6,7 @@ import com.questions.host.peer.Peer;
 
 import java.util.List;
 
-public class HostController {
+public class HostController implements EventsHost {
 
     private HostConfig config = new HostConfig();
 
@@ -28,34 +28,33 @@ public class HostController {
     }
 
     private void startHost() {
-        Host round = new Host(this.config);
-
-        round.eventWinner = this::winner;
-        round.eventNewAnswer = this::newAnswer;
-        round.eventNewPeer = this::newPeer;
+        Host round = new Host(this.config, this);
 
         round.start();
-        Console.writer.println("waiting the peers");
+        Console.writer.println("waiting the peers\npress enter to start questionnaire\n");
 
-        Console.input("press enter to start questionnaire");
+        Console.input("");
         round.startRound();
 
         try { round.join(); }
         catch (InterruptedException e) { e.printStackTrace(); }
     }
 
-    private void newPeer(Peer peer) {
-        Console.writer.println("new peer connected: " + peer.username);
-    }
-
-    private void newAnswer(Answer answer) {
+    @Override
+    public void answer(Answer answer) {
         Console.writer.println("new answer:\n");
         Console.writer.println("\tquestionId: " + answer.getQuestion().id);
         Console.writer.println("\tfrom: " + answer.getPeer());
         Console.writer.println("\tanswer: " + answer.getAnswer());
     }
 
-    private void winner(String peer, List<Answer> answers) {
+    @Override
+    public void peerConnection(Peer peer) {
+        Console.writer.println("new peer connected: " + peer.username);
+    }
+
+    @Override
+    public void winner(Peer peer, List<Answer> answers) {
         Console.writer.println("have a winner: " + peer);
     }
 }

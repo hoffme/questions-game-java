@@ -1,9 +1,8 @@
 package com.questions.host.peer;
 
+import com.questions.game.Commands.*;
 import com.questions.utils.Connection;
 import com.questions.utils.Console;
-import com.questions.host.events.EventAnswer;
-import com.questions.host.events.EventHostRound;
 import com.questions.host.questionnaire.Answer;
 import com.questions.host.questionnaire.Question;
 
@@ -12,15 +11,13 @@ import java.io.*;
 public class Peer extends Thread {
 
     public final String username;
-
     private final Connection conn;
+    private final EventsPeer events;
 
-    public EventAnswer eventAnswer;
-    public EventHostRound eventHostRound;
-
-    public Peer(Connection conn, String username) {
+    public Peer(Connection conn, String username, EventsPeer events) {
         this.conn = conn;
         this.username = username;
+        this.events = events;
     }
 
     @Override
@@ -29,34 +26,12 @@ public class Peer extends Thread {
 
         while (true) {
             try {
-                String[] data = new String(this.conn.receive()).split(":", 2);
+                ClientCommand cmd = ClientCommand.parseFrom(this.conn.receive());
 
-                String typeCommand = data.length > 0 ? data[0] : "";
-                String dataCommand = data.length > 1 ? data[1] : "";
+                if (cmd.hasAnswer()) this.events.answer(this, cmd.getAnswer());
+                else if (cmd.hasChangeRound()) this.events.changeRound(this, cmd.getChangeRound());
 
-                this.newCommand(typeCommand, dataCommand);
-            } catch (IOException e) {
-                Console.writer.println(e.getMessage());
-            }
-        }
-    }
-
-    private void newCommand(String typeCommand, String dataCommand) {
-        switch (typeCommand) {
-            case "answer":
-                if (this.eventAnswer != null) {
-                    String[] answer = dataCommand.split(";", 2);
-                    this.eventAnswer.newAnswer(this, Integer.parseInt(answer[0]), answer[1]);
-                }
-                break;
-            case "host":
-                if (this.eventHostRound != null) {
-                    String[] addr = dataCommand.split(";", 2);
-                    this.eventHostRound.event(addr[0], Integer.valueOf(addr[1]));
-                }
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + typeCommand);
+            } catch (IOException e) { Console.writer.println(e.getMessage()); }
         }
     }
 

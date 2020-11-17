@@ -1,6 +1,5 @@
 package com.questions.host.questionnaire;
 
-import com.questions.host.events.EventWinner;
 import java.util.*;
 
 public class Questionnaire {
@@ -8,18 +7,18 @@ public class Questionnaire {
     private final List<Question> questions;
     private final Map<String, List<Answer>> answers;
     private final Set<String> peersResponse;
+    private final QuestionnaireEvents events;
 
     private final int pointsToWin;
 
     private int indexQuestion;
     private boolean open;
 
-    public EventWinner eventWinner;
-
-    public Questionnaire(List<Question> questions) {
+    public Questionnaire(List<Question> questions, QuestionnaireEvents events) {
         this.questions = questions;
         this.answers = new HashMap<>();
         this.peersResponse = new HashSet<>();
+        this.events = events;
 
         this.pointsToWin = 5;
         this.indexQuestion = -1;
@@ -49,7 +48,7 @@ public class Questionnaire {
         this.answers.get(peer).add(answer);
 
         if (this.answers.get(peer).size() >= this.pointsToWin) {
-            this.eventWinner.win(peer, this.answers.get(peer));
+            this.events.winner(peer, this.answers.get(peer));
         }
 
         return answer;

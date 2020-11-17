@@ -7,7 +7,6 @@ option java_outer_classname = "Commands";
 
 message ClientCommand {
   oneof command {
-    Credentials credentials = 1;
     Answer answer = 2;
     ChangeHostRound changeRound = 3;
   }
@@ -15,7 +14,6 @@ message ClientCommand {
 
 message HostCommand {
   oneof command {
-    CredentialsResponse credentialsResponse = 1;
     Question question = 2;
     Result result = 3;
     Finish finish = 4;
@@ -32,12 +30,12 @@ message CredentialsResponse {
 }
 
 message Answer {
-  int64 questionId = 1;
+  int32 questionId = 1;
   string answer = 2;
 }
 
 message Question {
-  int64 id = 1;
+  int32 id = 1;
   string title = 2;
   string type = 3;
 }

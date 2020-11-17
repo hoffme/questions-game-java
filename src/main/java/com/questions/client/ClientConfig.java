@@ -20,7 +20,7 @@ public class ClientConfig {
         input = Console.input("> host "+defaultHost+": ");
         if (input.length() > 0) this.connectionHost = input;
 
-        String defaultPort = (this.connectionPort > 0) ? "[" + String.valueOf(this.connectionPort) + "]" : "";
+        String defaultPort = (this.connectionPort > 0) ? "[" + this.connectionPort + "]" : "";
         inputInt = Console.inputInt("> port "+defaultPort+": ");
         if (inputInt > 0) this.connectionPort = inputInt;
     }

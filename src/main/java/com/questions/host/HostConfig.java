@@ -5,13 +5,13 @@ import com.questions.utils.ParserQuestions;
 import com.questions.host.questionnaire.Question;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HostConfig {
 
     private String questionsPath = "./data.json";
-    private List<Question> questions = new LinkedList<>();
+    private List<Question> questions = new ArrayList<>();
     private String host = "localhost";
     private int port = 3000;
 
@@ -23,7 +23,7 @@ public class HostConfig {
         input = Console.input("> question path "+defaultQuestionsPath+": ");
         if (input.length() > 0) this.questionsPath = input;
 
-        try { this.questions = new ParserQuestions().load(this.questionsPath); }
+        try { this.questions = ParserQuestions.load(this.questionsPath); }
         catch (IOException e) { throw new HostError("error on load questions: " + e.getMessage()); }
 
         String defaultHost = (this.host.length() > 0) ? "[" + this.host + "]" : "";
