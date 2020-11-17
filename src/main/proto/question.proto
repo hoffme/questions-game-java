@@ -2,23 +2,44 @@ syntax = "proto3";
 
 package questions.messages;
 
-message Login {
+option java_package = "com.questions.game";
+option java_outer_classname = "Commands";
+
+message ClientCommand {
+  oneof command {
+    Credentials credentials = 1;
+    Answer answer = 2;
+    ChangeHostRound changeRound = 3;
+  }
+}
+
+message HostCommand {
+  oneof command {
+    CredentialsResponse credentialsResponse = 1;
+    Question question = 2;
+    Result result = 3;
+    Finish finish = 4;
+    ChangeHostRound changeRound = 5;
+  }
+}
+
+message Credentials {
   string username = 1;
 }
 
-message LoginResponse {
+message CredentialsResponse {
   string error = 1;
+}
+
+message Answer {
+  int64 questionId = 1;
+  string answer = 2;
 }
 
 message Question {
   int64 id = 1;
   string title = 2;
   string type = 3;
-}
-
-message Answer {
-  int64 questionId = 1;
-  string answer = 2;
 }
 
 message Result {
