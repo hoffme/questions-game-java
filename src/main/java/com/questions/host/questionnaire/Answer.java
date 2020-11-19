@@ -24,7 +24,7 @@ public class Answer {
         return peerUsername;
     }
 
-    public boolean correct() {
+    public boolean isCorrect() {
         return this.question.correct(this.answer);
     }
 }

@@ -8,7 +8,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParserQuestions {
+public class Parser {
     public static List<Question> load(String path) throws IOException {
         List<Question> result = new ArrayList<>();
 

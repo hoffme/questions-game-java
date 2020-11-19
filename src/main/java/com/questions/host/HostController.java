@@ -8,19 +8,10 @@ import java.util.List;
 
 public class HostController implements EventsHost {
 
-    private HostConfig config = new HostConfig();
+    public EventChangeRoundHost eventHostRound;
+    public HostConfig config = new HostConfig();
 
-    public void start() {
-        while (true) {
-            try {
-                this.config.configure();
-                break;
-            }
-            catch (HostError err) { Console.writer.println(err); }
-        }
-
-        this.startHost();
-    }
+    private Host round;
 
     public void start(HostConfig config) {
         this.config = config;
@@ -28,24 +19,18 @@ public class HostController implements EventsHost {
     }
 
     private void startHost() {
-        Host round = new Host(this.config, this);
+        this.round = new Host(this.config, this);
 
-        round.start();
+        this.round.start();
         Console.writer.println("waiting the peers\npress enter to start questionnaire\n");
 
         Console.input("");
-        round.startRound();
-
-        try { round.join(); }
-        catch (InterruptedException e) { e.printStackTrace(); }
+        this.round.startRound();
     }
 
     @Override
-    public void answer(Answer answer) {
-        Console.writer.println("new answer:\n");
-        Console.writer.println("\tquestionId: " + answer.getQuestion().id);
-        Console.writer.println("\tfrom: " + answer.getPeer());
-        Console.writer.println("\tanswer: " + answer.getAnswer());
+    public void newAnswer(Answer answer) {
+        Console.writer.println("new answer from '" + answer.getPeer() + "' in question with id: " + answer.getQuestion().id);
     }
 
     @Override
@@ -56,5 +41,24 @@ public class HostController implements EventsHost {
     @Override
     public void winner(Peer peer, List<Answer> answers) {
         Console.writer.println("have a winner: " + peer);
+
+    }
+
+    @Override
+    public void newHostRound(String host, int port) {
+        this.eventHostRound.newHost(host, port);
+    }
+
+    public void waitFinish() {
+        try { this.round.join(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+    }
+
+    public void stop() {
+        try {
+            this.round.close();
+        } catch (HostError hostError) {
+            Console.writer.println("error on stop host: " + hostError.getMessage());
+        }
     }
 }

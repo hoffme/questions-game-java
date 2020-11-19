@@ -9,20 +9,14 @@ public class Console {
     public static final PrintStream writer = System.out;
 
     public static String select(String title, String[] options) {
-        Console.writer.println(title);
+        String text = title + " [" + String.join(", ", options) + "]: ";
 
-        for (int i = 0; i < options.length; i++) {
-            Console.writer.println(i+1 + " " + options[i]);
-        }
-
-        int input = Console.inputInt("select: ", 1, options.length + 1);
-        return options[input - 1];
-    }
-
-    private static int inputInt(String title, int min, int max) {
         while (true) {
-            int input = Console.inputInt(title);
-            if (input >= min && input < max) return input;
+            String selected = Console.input(text);
+
+            for (String option: options) {
+                if (selected.toLowerCase().equals(option.toLowerCase())) return option;
+            }
 
             Console.writer.println("invalid input");
         }
@@ -34,8 +28,14 @@ public class Console {
     }
 
     public static int inputInt(String title) {
-        String input = Console.input(title);
-        try { return Integer.parseInt(input); } catch (Exception ignored) {}
-        return 0;
+        while (true) {
+            String input = Console.input(title);
+            if (input.equals("")) return 0;
+
+            try { return Integer.parseInt(input); }
+            catch (Exception ignored) {
+                Console.writer.println("invalid int");
+            }
+        }
     }
 }

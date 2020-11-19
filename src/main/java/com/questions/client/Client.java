@@ -12,9 +12,9 @@ import java.net.Socket;
 public class Client extends Thread {
 
     private final Connection conn;
-    private final ClientEvents events;
+    private final EventsClient events;
 
-    public Client(ClientConfig config, ClientEvents events) throws ClientError {
+    public Client(ClientConfig config, EventsClient events) throws ClientError {
         this.events = events;
 
         try {
@@ -56,22 +56,29 @@ public class Client extends Thread {
                 else if (cmd.hasQuestion()) this.events.question(cmd.getQuestion());
                 else if (cmd.hasResult()) this.events.result(cmd.getResult());
 
-            } catch (IOException err) { Console.writer.println(err.getMessage()); }
+            } catch (IOException err) {
+                Console.writer.println("error in connection: " + err.getMessage());
+                break;
+            }
         }
     }
 
     public void sendAnswer(int questionId, String answerString) throws ClientError {
-        this.sent(Answer.newBuilder()
-                .setQuestionId(questionId)
-                .setAnswer(answerString)
+        this.sent(ClientCommand.newBuilder()
+                .setAnswer(Answer.newBuilder()
+                        .setQuestionId(questionId)
+                        .setAnswer(answerString)
+                        .build())
                 .build()
         );
     }
 
     public void sendHostRound(String host, int port) throws ClientError {
-        this.sent(ChangeHostRound.newBuilder()
-                .setHost(host)
-                .setPort(port)
+        this.sent(ClientCommand.newBuilder()
+                .setChangeRound(ChangeHostRound.newBuilder()
+                        .setHost(host)
+                        .setPort(port)
+                        .build())
                 .build()
         );
     }

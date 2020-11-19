@@ -1,7 +1,7 @@
 package com.questions.host;
 
 import com.questions.utils.Console;
-import com.questions.utils.ParserQuestions;
+import com.questions.utils.Parser;
 import com.questions.host.questionnaire.Question;
 
 import java.io.IOException;
@@ -15,16 +15,22 @@ public class HostConfig {
     private String host = "localhost";
     private int port = 3000;
 
-    public void configure() throws HostError {
+    public void configure() {
         String input;
         int inputInt;
 
-        String defaultQuestionsPath = (this.questionsPath.length() > 0) ? "[" + this.questionsPath + "]" : "";
-        input = Console.input("> question path "+defaultQuestionsPath+": ");
-        if (input.length() > 0) this.questionsPath = input;
+        while (true) {
+            String defaultQuestionsPath = (this.questionsPath.length() > 0) ? "[" + this.questionsPath + "]" : "";
+            input = Console.input("> question path "+defaultQuestionsPath+": ");
+            if (input.length() > 0) this.questionsPath = input;
 
-        try { this.questions = ParserQuestions.load(this.questionsPath); }
-        catch (IOException e) { throw new HostError("error on load questions: " + e.getMessage()); }
+            try {
+                this.loadQuestions();
+                break;
+            } catch (IOException e) {
+                Console.writer.println("error on load questions: " + e.getMessage());
+            }
+        }
 
         String defaultHost = (this.host.length() > 0) ? "[" + this.host + "]" : "";
         input = Console.input("> host "+defaultHost+": ");
@@ -33,6 +39,10 @@ public class HostConfig {
         String defaultPort = (this.port > 0) ? "[" + this.port + "]" : "";
         inputInt = Console.inputInt("> port "+defaultPort+": ");
         if (inputInt > 0) this.port = inputInt;
+    }
+
+    public void loadQuestions() throws IOException {
+        this.questions = Parser.load(this.questionsPath);
     }
 
     public String getQuestionsPath() {

@@ -3,45 +3,45 @@ package com.questions.client;
 import com.questions.game.Commands;
 import com.questions.utils.Console;
 
-public class ClientController implements ClientEvents {
+public class ClientController implements EventsClient {
 
+    public EventWinner eventWinner;
     public ClientConfig config = new ClientConfig();
 
     private Client client;
     private int points;
 
-    public void start() {
-        this.config.configure();
-        this.startClient();
-    }
-
     public void start(ClientConfig config) {
         this.config = config;
-        this.startClient();
-    }
 
-    private void startClient() {
-        Console.writer.print("login ->");
+        Console.writer.print("login ... ");
         try { this.client = new Client(this.config, this); }
         catch (Exception err) {
             Console.writer.println(err.getMessage());
             return;
         }
-        Console.writer.println(" successfully");
+        Console.writer.println("successfully");
 
         this.points = 0;
 
         Console.writer.println("waiting the round ...");
-
         this.client.start();
+    }
 
+    public void waitFinish() {
         try { this.client.join(); }
         catch (InterruptedException e) { e.printStackTrace(); }
+    }
+
+    public void notifyHostReady(String host, Integer port) throws ClientError {
+        this.client.sendHostRound(host, port);
     }
 
     @Override
     public void finish(Commands.Finish finish) {
         Console.writer.println(finish.getWin() ? "You have won, Congratulations!!!" : "You lost, nice try");
+
+        if (finish.getWin() && this.eventWinner != null) this.eventWinner.win();
     }
 
     @Override
@@ -79,6 +79,14 @@ public class ClientController implements ClientEvents {
         if (result.getMe()) {
             this.points++;
             Console.writer.println("You have response correct [" + this.points + " points]");
+        }
+    }
+
+    public void stop() {
+        try {
+            this.client.close();
+        } catch (ClientError clientError) {
+            Console.writer.println("error to close client: " + clientError.getMessage());
         }
     }
 }

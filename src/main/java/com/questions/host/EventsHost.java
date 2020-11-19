@@ -6,7 +6,8 @@ import com.questions.host.questionnaire.Answer;
 import java.util.List;
 
 public interface EventsHost {
-    void answer(Answer answer);
+    void newAnswer(Answer answer);
     void peerConnection(Peer peer);
     void winner(Peer peer, List<Answer> answers);
+    void newHostRound(String host, int peer);
 }
