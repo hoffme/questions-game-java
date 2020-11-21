@@ -38,11 +38,6 @@ public class Client extends Thread {
         }
     }
 
-    private void sent(GeneratedMessageV3 protoMessage) throws ClientError {
-        try { this.conn.send(protoMessage.toByteArray()); }
-        catch (IOException e) { throw new ClientError("error to sent message: " + e.getMessage()); }
-    }
-
     @Override
     public void run() {
         super.run();
@@ -81,6 +76,11 @@ public class Client extends Thread {
                         .build())
                 .build()
         );
+    }
+
+    private void sent(GeneratedMessageV3 protoMessage) throws ClientError {
+        try { this.conn.send(protoMessage.toByteArray()); }
+        catch (IOException e) { throw new ClientError("error to sent message: " + e.getMessage()); }
     }
 
     public void close() throws ClientError {

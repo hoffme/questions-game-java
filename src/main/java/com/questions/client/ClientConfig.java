@@ -9,19 +9,26 @@ public class ClientConfig {
     private int connectionPort = 3000;
 
     public void configure() {
-        String input;
-        int inputInt;
+        this.configureUsername();
+        this.configureHost();
+        this.configurePort();
+    }
 
+    public void configureUsername() {
         String defaultUsername = (this.userName.length() > 0) ? "[" + this.userName + "]" : "";
-        input = Console.input("> username "+defaultUsername+": ");
+        String input = Console.input("> username "+defaultUsername+": ");
         if (input.length() > 0) this.userName = input;
+    }
 
+    public void configureHost() {
         String defaultHost = (this.connectionHost.length() > 0) ? "[" + this.connectionHost + "]" : "";
-        input = Console.input("> host "+defaultHost+": ");
+        String input = Console.input("> host "+defaultHost+": ");
         if (input.length() > 0) this.connectionHost = input;
+    }
 
+    public void configurePort() {
         String defaultPort = (this.connectionPort > 0) ? "[" + this.connectionPort + "]" : "";
-        inputInt = Console.inputInt("> port "+defaultPort+": ");
+        int inputInt = Console.inputInt("> port "+defaultPort+": ");
         if (inputInt > 0) this.connectionPort = inputInt;
     }
 

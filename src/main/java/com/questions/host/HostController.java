@@ -13,12 +13,7 @@ public class HostController implements EventsHost {
 
     private Host round;
 
-    public void start(HostConfig config) {
-        this.config = config;
-        this.startHost();
-    }
-
-    private void startHost() {
+    public void start() {
         this.round = new Host(this.config, this);
 
         this.round.start();

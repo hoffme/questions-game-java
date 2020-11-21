@@ -1,9 +1,7 @@
 package com.questions;
 
-import com.questions.client.ClientConfig;
 import com.questions.client.ClientController;
 import com.questions.client.ClientError;
-import com.questions.host.HostConfig;
 import com.questions.host.HostController;
 import com.questions.utils.Console;
 
@@ -19,11 +17,10 @@ public class App {
         this.host.eventHostRound = (String host, int port) -> {
             Console.writer.println("\nChanging to the new host [" + host + ":" + port + "]\n");
 
-            ClientConfig config = this.client.config;
-            config.setConnectionHost(host);
-            config.setConnectionPort(port);
+            this.client.config.setConnectionHost(host);
+            this.client.config.setConnectionPort(port);
 
-            this.client.start(config);
+            this.client.start();
             this.host.stop();
             this.client.waitFinish();
         };
@@ -32,7 +29,7 @@ public class App {
             Console.writer.println("\nConfigure the host to next round:\n");
 
             this.host.config.configure();
-            this.host.start(this.host.config);
+            this.host.start();
 
             try {
                 this.client.notifyHostReady(this.host.config.getHost(), this.host.config.getPort());
@@ -48,18 +45,14 @@ public class App {
     }
 
     public void startHost() {
-        HostConfig config = new HostConfig();
-        config.configure();
-
-        this.host.start(config);
+        this.host.config.configure();
+        this.host.start();
         this.host.waitFinish();
     }
 
     public void startClient() {
-        ClientConfig config = new ClientConfig();
-        config.configure();
-
-        this.client.start(config);
+        this.client.config.configure();
+        this.client.start();
         this.client.waitFinish();
     }
 }

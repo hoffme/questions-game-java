@@ -130,11 +130,11 @@ public class Host extends Thread implements EventsPeer, EventsQuestionnaire {
         Answer answer = this.questionnaire.answer(answerCmd.getQuestionId(), peer.username, answerCmd.getAnswer());
 
         boolean answerActualQuestion = this.questionnaire.actualQuestion().id == answerCmd.getQuestionId();
-        boolean answerLater = !this.questionnaire.isOpen();
+        boolean answerOnTime = this.questionnaire.isOpen();
 
         this.events.newAnswer(answer);
 
-        if (answerActualQuestion && !answerLater && answer.isCorrect()) {
+        if (answerActualQuestion && answerOnTime && answer.isCorrect()) {
             this.sendResults(peer, answer);
             this.sendNewQuestion();
         } else if (answerActualQuestion && this.questionnaire.numberResponse() == this.peers.size()) {

@@ -11,13 +11,16 @@ public class ClientController implements EventsClient {
     private Client client;
     private int points;
 
-    public void start(ClientConfig config) {
-        this.config = config;
-
+    public void start() {
         Console.writer.print("login ... ");
-        try { this.client = new Client(this.config, this); }
-        catch (Exception err) {
+        try {
+            this.client = new Client(this.config, this);
+        } catch (Exception err) {
             Console.writer.println(err.getMessage());
+
+            Console.writer.println("reconfigure client");
+            this.config.configure();
+            this.start();
             return;
         }
         Console.writer.println("successfully");
@@ -55,7 +58,7 @@ public class ClientController implements EventsClient {
         this.config.setConnectionPort(change.getPort());
 
         Console.writer.println("new round in " + change.getHost() + ":" + change.getPort());
-        this.start(this.config);
+        this.start();
     }
 
     @Override

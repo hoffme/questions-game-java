@@ -18,7 +18,7 @@ public class Console {
                 if (selected.toLowerCase().equals(option.toLowerCase())) return option;
             }
 
-            Console.writer.println("invalid input");
+            Console.writer.println("invalid option");
         }
     }
 
