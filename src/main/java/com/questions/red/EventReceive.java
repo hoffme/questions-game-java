@@ -1,5 +1,7 @@
 package com.questions.red;
 
+import com.questions.CommandOuterClass.Command;
+
 public interface EventReceive {
-    void command(byte[] cmd);
+    void command(Neighbour neighbour, Command cmd);
 }

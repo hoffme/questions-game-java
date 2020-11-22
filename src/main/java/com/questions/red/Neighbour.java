@@ -1,5 +1,7 @@
 package com.questions.red;
 
+import com.questions.CommandOuterClass.*;
+
 import java.io.IOException;
 
 public class Neighbour extends Thread {
@@ -7,34 +9,45 @@ public class Neighbour extends Thread {
 	private final Connection connection;
 	private final EventReceive command;
 
-	private final String nodeUsername;
+	private final String username;
+	private final String alias;
 
-	private String username;
-	private String alias;
-
-    public Neighbour(Connection connection, String nodeUsername, EventReceive command) {
+    public Neighbour(Connection connection, String nodeUsername, EventReceive command) throws IOException {
 		this.connection = connection;
 		this.command = command;
-		this.nodeUsername = nodeUsername;
+
+		this.send(
+				Command
+				.newBuilder()
+				.setReport(Report
+						.newBuilder()
+						.setUsername(nodeUsername)
+				).build()
+		);
+
+		Report report = Command.parseFrom(this.connection.receive()).getReport();
+
+		this.username = report.getUsername();
+		this.alias = this.username + "@" + this.getHost() + ":" + this.getPort();
 	}
 
 	public void run() {
 		while (true) {
 			try {
-				this.command.command(connection.receive());
+				this.command.command(this, Command.parseFrom(this.connection.receive()));
 			} catch (IOException e) {
-				System.out.println("error on receive: "+ e.getMessage());
+				System.out.println("error on receive from ("+this.alias+"): "+ e.getMessage());
 			}
 		}
 	}
 
-	public void sent(byte[] data) throws IOException {
-		this.connection.send(data);
-	}
+	public void send(Command cmd) throws IOException { this.connection.send(cmd.toByteArray()); }
 
 	public String getUsername() { return this.username; }
 
 	public String getAlias() { return this.alias; }
 
-	public void setAliasUsername(String alias) { this.alias = alias; }
+	public String getHost() { return this.connection.getHost(); }
+
+	public int getPort() { return this.connection.getPort(); }
 }

@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package questions.messages;
+
+option java_package = "com.questions";
+
+message PeerResult {
+  bool win = 1;
+  string alias = 2;
+  int32 points = 3;
+}
+
+message RoundResult {
+  repeated PeerResult peers = 1;
+}
+
+message AnswerResult {
+  repeated PeerResult peers = 1;
+}
+
+message Answer {
+  int32 questionId = 1;
+  repeated string data = 2;
+}
+
+enum QuestionType {
+  Simple = 0;
+  Multiple = 1;
+}
+
+message Question {
+  int32 id = 1;
+  string title = 2;
+  QuestionType type = 3;
+}
+
+message Address {
+  string host = 1;
+  int32 port = 2;
+  string alias = 3;
+}
+
+message ReadyMesh {
+  bool ok = 1;
+}
+
+message CreateMesh {
+  repeated Address addresses = 1;
+}
+
+message GameResponse {
+  bool accept = 1;
+}
+
+message GameRequest {
+  Address host = 1;
+}
+
+message Report {
+  string username = 1;
+}
+
+message Command {
+  oneof cmd {
+    // commands from red
+    Report report = 1; // from connect node with node
+
+    // commands from initialize game
+    GameRequest gameRequest = 2; // request to init the game
+    GameResponse gameResponse = 3; // response with peer play the game
+    CreateMesh createMesh = 4; // send the peers play in red
+    ReadyMesh readyMesh = 5; // send the peer to initial host if ready
+
+    // commands from game
+    Question question = 6;
+    Answer answer = 7;
+    AnswerResult answerResult = 8;
+
+    // commands from round
+    RoundResult roundResult = 9;
+  }
+}

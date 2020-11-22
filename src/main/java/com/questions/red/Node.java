@@ -1,13 +1,15 @@
 package com.questions.red;
 
+import com.questions.CommandOuterClass;
+import com.questions.CommandOuterClass.Command;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
 
 public abstract class Node extends Server {
 
-	private final Map<String, Neighbour> neighbours;
-	private final String username;
+	protected final Map<String, Neighbour> neighbours;
+	protected final String username;
 
 	public Node(String username, int port) throws IOException {
 		super(port);
@@ -19,11 +21,12 @@ public abstract class Node extends Server {
 	}
 
 	private void addNeighbour(Connection connection) {
-		Neighbour neighbour = new Neighbour(connection, this.username, this::receive);
-		neighbour.start();
-
-		for (int i = 0; this.neighbours.containsKey(neighbour.getAlias()); i++) {
-			neighbour.setAliasUsername(neighbour.getUsername() + "[" + i + "]");
+		Neighbour neighbour = null;
+		try {
+			neighbour = new Neighbour(connection, this.username, this::receive);
+		} catch (IOException e) {
+			System.out.println("error on connect to neighbour: " + e.getMessage());
+			return;
 		}
 
 		this.neighbours.put(neighbour.getAlias(), neighbour);
@@ -36,19 +39,10 @@ public abstract class Node extends Server {
 		this.addNeighbour(new Connection(new Socket(host, port)));
 	}
 
-	protected void send(String alias, byte[] data) throws IOException {
-		this.neighbours.get(alias).sent(data);
+	protected void send(String alias, Command cmd) throws IOException {
+		this.neighbours.get(alias).send(cmd);
 	}
 
-	protected boolean sentAll(byte[] data) {
-		boolean allSent = true;
-		for (Neighbour neighbour: this.neighbours.values()) {
-			try { neighbour.sent(data); }
-			catch (IOException ignored) { allSent = false; }
-		}
-		return allSent;
-	}
-
-	abstract void receive(byte[] data);
+	protected abstract void receive(Neighbour neighbour, Command command);
 }
 

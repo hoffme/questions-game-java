@@ -41,4 +41,8 @@ public class Connection {
     }
 
     public void close() throws IOException { this.socket.close(); }
+
+    public String getHost() { return this.socket.getInetAddress().getCanonicalHostName(); }
+
+    public int getPort() { return this.socket.getPort(); }
 }
