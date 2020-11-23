@@ -5,13 +5,11 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
 
-public class Node extends Server {
-
-	public NodeReceiver receiver;
+public abstract class Node extends Server {
 
 	public final Map<String, Neighbour> neighbours;
 
-	public final String username;
+	public final String alias;
 	public final String host;
 	public final int port;
 
@@ -20,7 +18,7 @@ public class Node extends Server {
 
 		this.neighbours = new HashMap<>();
 
-		this.username = username;
+		this.alias = username + "@" + host + ":" + port;
 		this.host = host;
 		this.port = port;
 
@@ -30,7 +28,7 @@ public class Node extends Server {
 	private void addNeighbour(Connection connection) {
 		Neighbour neighbour = null;
 		try {
-			neighbour = new Neighbour(connection, this.username, this::receive);
+			neighbour = new Neighbour(connection, this.alias, this::receive);
 		} catch (IOException e) {
 			System.out.println("error on connect to neighbour: " + e.getMessage());
 			return;
@@ -51,11 +49,9 @@ public class Node extends Server {
 	}
 
 	public String getAlias() {
-		return this.username + "@" + this.host + ":" + this.port;
+		return this.alias;
 	}
 
-	private void receive(Neighbour neighbour, Command command) {
-		this.receiver.command(neighbour, command);
-	}
+	abstract protected void receive(Neighbour neighbour, Command command);
 }
 

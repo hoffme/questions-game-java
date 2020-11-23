@@ -9,26 +9,23 @@ public class Neighbour extends Thread {
 	private final Connection connection;
 	private final NodeReceiver command;
 
-	private final String username;
 	private final String alias;
 
-    public Neighbour(Connection connection, String nodeUsername, NodeReceiver command) throws IOException {
+    public Neighbour(Connection connection, String nodeAlias, NodeReceiver command) throws IOException {
 		this.connection = connection;
 		this.command = command;
 
 		this.send(
 				Command
 				.newBuilder()
-				.setReport(Report
+				.setRegister(Register
 						.newBuilder()
-						.setUsername(nodeUsername)
+						.setAlias(nodeAlias)
 				).build()
 		);
 
-		Report report = Command.parseFrom(this.connection.receive()).getReport();
-
-		this.username = report.getUsername();
-		this.alias = this.username + "@" + this.getHost() + ":" + this.getPort();
+		Register register = Command.parseFrom(this.connection.receive()).getRegister();
+		this.alias = register.getAlias();
 	}
 
 	public void run() {
@@ -43,11 +40,5 @@ public class Neighbour extends Thread {
 
 	public void send(Command cmd) throws IOException { this.connection.send(cmd.toByteArray()); }
 
-	public String getUsername() { return this.username; }
-
 	public String getAlias() { return this.alias; }
-
-	public String getHost() { return this.connection.getHost(); }
-
-	public int getPort() { return this.connection.getPort(); }
 }

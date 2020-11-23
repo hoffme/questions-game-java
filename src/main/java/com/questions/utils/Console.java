@@ -8,14 +8,14 @@ public class Console {
     private static final Scanner reader = new Scanner(System.in);
     private static final PrintStream writer = System.out;
 
-    public static String select(String title, String[] options) {
+    public static int select(String title, String[] options) {
         String text = title + " [" + String.join(", ", options) + "]: ";
 
         while (true) {
             String selected = Console.input(text);
 
-            for (String option: options) {
-                if (selected.toLowerCase().equals(option.toLowerCase())) return option;
+            for (int i = 0; i < options.length; i++) {
+                if (selected.toLowerCase().equals(options[i].toLowerCase())) return i;
             }
 
             Console.println("invalid option");

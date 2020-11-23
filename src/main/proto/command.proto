@@ -40,33 +40,27 @@ message Address {
   string alias = 3;
 }
 
-message ReadyMesh {
-  bool ok = 1;
+message RoundRequest {
+  Address host = 1;
+  int64 time = 2;
 }
 
-message CreateMesh {
-  repeated Address addresses = 1;
-}
-
-message Report {
-  string username = 1;
+message Register {
+  string alias = 1;
 }
 
 message Command {
   oneof cmd {
     // commands from red
-    Report report = 1; // from connect node with node
-
-    // commands from initialize game
-    CreateMesh createMesh = 2; // send the peers play in red
-    ReadyMesh readyMesh = 3; // send the peer to initial host if ready
-
-    // commands from game
-    Question question = 4;
-    Answer answer = 5;
-    AnswerResult answerResult = 6;
+    Register register = 1;
 
     // commands from round
-    RoundResult roundResult = 7;
+    RoundRequest roundRequest = 2;
+
+    Question question = 3;
+    Answer answer = 4;
+    AnswerResult answerResult = 5;
+
+    RoundResult roundResult = 6;
   }
 }

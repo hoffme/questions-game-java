@@ -31,36 +31,31 @@ public class PeerConfig {
             String value = args[i+1];
 
             switch (key) {
-                case "-m": {
+                case "-m" -> {
                     mode = true;
                     config.modeClient = value.equals("client");
-                    break;
                 }
-                case "-u": {
+                case "-u" -> {
                     username = true;
                     config.username = value;
-                    break;
                 }
-                case "-h": {
+                case "-h" -> {
                     host = true;
                     config.host = value;
-                    break;
                 }
-                case "-p": {
+                case "-p" -> {
                     port = true;
                     config.port = Integer.parseInt(value);
-                    break;
                 }
-                case "-q": {
+                case "-q" -> {
                     questions = true;
                     config.questionsPath = value;
                     try {
                         config.loadQuestions();
                     } catch (IOException e) {
-                        Console.println("error on load questions: ");
-                        e.printStackTrace();
+                        Console.println("error on load questions: " + e.getMessage());
+                        System.exit(1);
                     }
-                    break;
                 }
             }
         }
@@ -75,8 +70,8 @@ public class PeerConfig {
     }
 
     public void configureMode() {
-        String option = Console.select("> mode: ", new String[]{"host", "client"});
-        this.modeClient = option.equals("client");
+        int indexSelected = Console.select("> mode: ", new String[]{"host", "client"});
+        this.modeClient = indexSelected == 1;
     }
 
     public void configureQuestionsPath() {
@@ -102,7 +97,7 @@ public class PeerConfig {
 
     public void configureHost() {
         String defaultHost = (this.host.length() > 0) ? "[" + this.host + "]" : "";
-        String input = Console.input("> username "+defaultHost+": ");
+        String input = Console.input("> host "+defaultHost+": ");
         if (input.length() > 0) this.host = input;
     }
 
