@@ -48,14 +48,6 @@ message CreateMesh {
   repeated Address addresses = 1;
 }
 
-message GameResponse {
-  bool accept = 1;
-}
-
-message GameRequest {
-  Address host = 1;
-}
-
 message Report {
   string username = 1;
 }
@@ -66,17 +58,15 @@ message Command {
     Report report = 1; // from connect node with node
 
     // commands from initialize game
-    GameRequest gameRequest = 2; // request to init the game
-    GameResponse gameResponse = 3; // response with peer play the game
-    CreateMesh createMesh = 4; // send the peers play in red
-    ReadyMesh readyMesh = 5; // send the peer to initial host if ready
+    CreateMesh createMesh = 2; // send the peers play in red
+    ReadyMesh readyMesh = 3; // send the peer to initial host if ready
 
     // commands from game
-    Question question = 6;
-    Answer answer = 7;
-    AnswerResult answerResult = 8;
+    Question question = 4;
+    Answer answer = 5;
+    AnswerResult answerResult = 6;
 
     // commands from round
-    RoundResult roundResult = 9;
+    RoundResult roundResult = 7;
   }
 }

@@ -1,21 +1,28 @@
 package com.questions.red;
 
-import com.questions.CommandOuterClass;
 import com.questions.CommandOuterClass.Command;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
 
-public abstract class Node extends Server {
+public class Node extends Server {
 
-	protected final Map<String, Neighbour> neighbours;
-	protected final String username;
+	public NodeReceiver receiver;
 
-	public Node(String username, int port) throws IOException {
+	public final Map<String, Neighbour> neighbours;
+
+	public final String username;
+	public final String host;
+	public final int port;
+
+	public Node(String username, String host, int port) throws IOException {
 		super(port);
 
 		this.neighbours = new HashMap<>();
+
 		this.username = username;
+		this.host = host;
+		this.port = port;
 
 		this.start();
 	}
@@ -35,14 +42,20 @@ public abstract class Node extends Server {
 	@Override
 	protected void newConnection(Connection connection) { this.addNeighbour(connection); }
 
-	protected void connect(String host, int port) throws IOException {
+	public void connect(String host, int port) throws IOException {
 		this.addNeighbour(new Connection(new Socket(host, port)));
 	}
 
-	protected void send(String alias, Command cmd) throws IOException {
+	public void send(String alias, Command cmd) throws IOException {
 		this.neighbours.get(alias).send(cmd);
 	}
 
-	protected abstract void receive(Neighbour neighbour, Command command);
+	public String getAlias() {
+		return this.username + "@" + this.host + ":" + this.port;
+	}
+
+	private void receive(Neighbour neighbour, Command command) {
+		this.receiver.command(neighbour, command);
+	}
 }
 

@@ -7,12 +7,12 @@ import java.io.IOException;
 public class Neighbour extends Thread {
 
 	private final Connection connection;
-	private final EventReceive command;
+	private final NodeReceiver command;
 
 	private final String username;
 	private final String alias;
 
-    public Neighbour(Connection connection, String nodeUsername, EventReceive command) throws IOException {
+    public Neighbour(Connection connection, String nodeUsername, NodeReceiver command) throws IOException {
 		this.connection = connection;
 		this.command = command;
 
