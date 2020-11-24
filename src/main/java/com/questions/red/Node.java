@@ -25,31 +25,25 @@ public abstract class Node extends Server {
 		this.start();
 	}
 
-	private void addNeighbour(Connection connection) {
-		Neighbour neighbour = null;
+	private void newNeighbour(Connection connection) {
 		try {
-			neighbour = new Neighbour(connection, this.alias, this::receive);
+			Neighbour neighbour = new Neighbour(connection, this.alias, this::receive);
+			neighbour.start();
+			this.neighbours.put(neighbour.getAlias(), neighbour);
 		} catch (IOException e) {
 			System.out.println("error on connect to neighbour: " + e.getMessage());
-			return;
 		}
-
-		this.neighbours.put(neighbour.getAlias(), neighbour);
 	}
 
 	@Override
-	protected void newConnection(Connection connection) { this.addNeighbour(connection); }
+	protected void newConnection(Connection connection) { this.newNeighbour(connection); }
 
 	public void connect(String host, int port) throws IOException {
-		this.addNeighbour(new Connection(new Socket(host, port)));
+		this.newNeighbour(new Connection(new Socket(host, port)));
 	}
 
 	public void send(String alias, Command cmd) throws IOException {
 		this.neighbours.get(alias).send(cmd);
-	}
-
-	public String getAlias() {
-		return this.alias;
 	}
 
 	abstract protected void receive(Neighbour neighbour, Command command);
