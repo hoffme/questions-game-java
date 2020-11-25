@@ -1,4 +1,4 @@
-package com.questions.game;
+package com.questions.peer;
 
 import com.questions.utils.Console;
 import com.questions.utils.Parser;
@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PeerConfig {
+public class Config {
 
     public boolean modeClient = true;
     public String questionsPath = "./data.json";
@@ -17,8 +17,8 @@ public class PeerConfig {
     public String host = "localhost";
     public int port = 3000;
 
-    public static PeerConfig fromArgs(String[] args) {
-        PeerConfig config = new PeerConfig();
+    public static Config fromArgs(String[] args) {
+        Config config = new Config();
 
         boolean mode = false;
         boolean questions = false;
@@ -70,8 +70,8 @@ public class PeerConfig {
     }
 
     public void configureMode() {
-        int indexSelected = Console.select("> mode: ", new String[]{"host", "client"});
-        this.modeClient = indexSelected == 1;
+        int indexOption = Console.select("> mode: ", new String[]{"host", "client"});
+        this.modeClient = indexOption == 1;
     }
 
     public void configureQuestionsPath() {
@@ -103,7 +103,7 @@ public class PeerConfig {
 
     public void configurePort() {
         String defaultPort = (this.port > 0) ? "[" + this.port + "]" : "";
-        int input = Console.inputInt("> port "+defaultPort+": ");
+        int input = Console.inputInt("> port "+defaultPort+": ", true);
         if (input > 0) this.port = input;
     }
 

@@ -23,16 +23,36 @@ public class Parser {
         for (JsonElement questionElement: questionsArray) {
             JsonObject questObj = questionElement.getAsJsonObject();
 
-            Question question = new Question(
-                    questObj.get("id").getAsInt(),
-                    questObj.get("question").getAsString(),
-                    questObj.get("type").getAsString(),
-                    questObj.get("answer").getAsString()
-            );
+            Question question = null;
+            switch (questObj.get("type").getAsString()) {
+                case Question.TypeMultiple -> question = Parser.createQuestionMultiple(questObj);
+                case Question.TypeSimple -> question = Parser.createQuestionSimple(questObj);
+            }
 
-            result.add(question);
+            if (question != null) result.add(question);
         }
 
         return result;
+    }
+
+    private static Question createQuestionSimple(JsonObject questObj) {
+        return Question.Simple(
+                questObj.get("id").getAsInt(),
+                questObj.get("question").getAsString(),
+                questObj.get("answer").getAsString()
+        );
+    }
+
+    private static Question createQuestionMultiple(JsonObject questObj) {
+        ArrayList<String> answers = new ArrayList<>();
+        for (JsonElement answer: questObj.get("answer").getAsJsonArray()) {
+            answers.add(answer.getAsString());
+        }
+
+        return Question.Multiple(
+                questObj.get("id").getAsInt(),
+                questObj.get("question").getAsString(),
+                answers
+        );
     }
 }

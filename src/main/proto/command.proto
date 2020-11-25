@@ -4,18 +4,19 @@ package questions.messages;
 
 option java_package = "com.questions";
 
-message PeerResult {
-  bool win = 1;
-  string alias = 2;
-  int32 points = 3;
+message RoundResult {
+  string aliasWinner = 1;
 }
 
-message RoundResult {
-  repeated PeerResult peers = 1;
+message PeerResult {
+  string alias = 1;
+  int32 points = 2;
+  repeated string answer = 3;
 }
 
 message AnswerResult {
-  repeated PeerResult peers = 1;
+  string aliasCorrect = 1;
+  repeated PeerResult peers = 2;
 }
 
 message Answer {
@@ -23,15 +24,10 @@ message Answer {
   repeated string data = 2;
 }
 
-enum QuestionType {
-  Simple = 0;
-  Multiple = 1;
-}
-
 message Question {
   int32 id = 1;
   string title = 2;
-  QuestionType type = 3;
+  string type = 3;
 }
 
 message Address {
@@ -40,9 +36,13 @@ message Address {
   string alias = 3;
 }
 
+message RoundResponse {
+  bool ok = 1;
+}
+
 message RoundRequest {
-  Address host = 1;
-  int64 time = 2;
+  string id = 1;
+  Address host = 2;
 }
 
 message Register {
@@ -56,11 +56,12 @@ message Command {
 
     // commands from round
     RoundRequest roundRequest = 2;
+    RoundResponse roundResponse = 3;
 
-    Question question = 3;
-    Answer answer = 4;
-    AnswerResult answerResult = 5;
+    Question question = 4;
+    Answer answer = 5;
+    AnswerResult answerResult = 6;
 
-    RoundResult roundResult = 6;
+    RoundResult roundResult = 7;
   }
 }

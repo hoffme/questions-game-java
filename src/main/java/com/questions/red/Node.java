@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
 
-public abstract class Node extends Server {
+public abstract class Node extends Server implements NeighbourListener {
 
 	public final Map<String, Neighbour> neighbours;
 
@@ -27,12 +27,15 @@ public abstract class Node extends Server {
 
 	private void newNeighbour(Connection connection) {
 		try {
-			Neighbour neighbour = new Neighbour(connection, this.alias, this::receive);
-			neighbour.start();
+			Neighbour neighbour = new Neighbour(connection, this.alias, this);
 			this.neighbours.put(neighbour.getAlias(), neighbour);
 		} catch (IOException e) {
 			System.out.println("error on connect to neighbour: " + e.getMessage());
 		}
+	}
+
+	protected void sendAll(Command cmd) {
+		for (Neighbour neighbour: this.neighbours.values()) neighbour.send(cmd);
 	}
 
 	@Override
@@ -42,10 +45,12 @@ public abstract class Node extends Server {
 		this.newNeighbour(new Connection(new Socket(host, port)));
 	}
 
-	public void send(String alias, Command cmd) throws IOException {
-		this.neighbours.get(alias).send(cmd);
+	@Override
+	public void peerDisconnected(Neighbour neighbour) {
+		this.neighbours.remove(neighbour.getAlias());
 	}
 
-	abstract protected void receive(Neighbour neighbour, Command command);
+	@Override
+	abstract public void peerCommand(Neighbour neighbour, Command cmd);
 }
 

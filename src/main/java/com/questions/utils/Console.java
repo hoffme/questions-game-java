@@ -27,10 +27,10 @@ public class Console {
         return Console.reader.nextLine();
     }
 
-    public static int inputInt(String title) {
+    public static int inputInt(String title, boolean emptyValid) {
         while (true) {
             String input = Console.input(title);
-            if (input.equals("")) return 0;
+            if (emptyValid && input.equals("")) return 0;
 
             try { return Integer.parseInt(input); }
             catch (Exception ignored) {
@@ -42,4 +42,17 @@ public class Console {
     public static void print(String text) { Console.writer.print(text); }
 
     public static void println(String text) { Console.writer.println(text); }
+
+    public static int selectNumber(String title, String[] options) {
+        while (true) {
+            Console.println(title);
+            for (int i = 0; i < options.length; i++) Console.println("[" + i + "] " + options[i]);
+
+            int selected = Console.inputInt("> ", false);
+
+            if (selected >= 0 && selected < options.length) return selected;
+
+            Console.println("invalid option");
+        }
+    }
 }
