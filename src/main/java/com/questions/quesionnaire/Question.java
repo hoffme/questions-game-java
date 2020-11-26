@@ -1,4 +1,4 @@
-package com.questions.utils;
+package com.questions.quesionnaire;
 
 import java.util.ArrayList;
 import java.util.List;

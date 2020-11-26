@@ -1,6 +1,7 @@
 package com.questions.utils;
 
 import java.io.PrintStream;
+import java.util.List;
 import java.util.Scanner;
 
 public class Console {
@@ -43,14 +44,14 @@ public class Console {
 
     public static void println(String text) { Console.writer.println(text); }
 
-    public static int selectNumber(String title, String[] options) {
+    public static int selectNumber(String title, List<String> options) {
         while (true) {
             Console.println(title);
-            for (int i = 0; i < options.length; i++) Console.println("[" + i + "] " + options[i]);
+            for (int i = 0; i < options.size(); i++) Console.println("[" + i + "] " + options.get(i));
 
             int selected = Console.inputInt("> ", false);
 
-            if (selected >= 0 && selected < options.length) return selected;
+            if (selected >= 0 && selected < options.size()) return selected;
 
             Console.println("invalid option");
         }

@@ -2,7 +2,7 @@ package com.questions.peer;
 
 import com.questions.utils.Console;
 import com.questions.utils.Parser;
-import com.questions.utils.Question;
+import com.questions.quesionnaire.Question;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,9 +1,11 @@
 package com.questions.peer;
 
 import com.questions.CommandOuterClass;
+import com.questions.quesionnaire.Questionnaire;
+import com.questions.quesionnaire.Round;
 import com.questions.red.Neighbour;
 import com.questions.utils.Console;
-import com.questions.utils.Question;
+import com.questions.quesionnaire.Question;
 
 import java.util.*;
 
@@ -13,30 +15,23 @@ public class Host extends PeerListener {
 
     private final Peer peer;
     private final List<Question> questions;
+    private final Set<Neighbour> participants;
 
-    private long idRound;
-
-    private final Set<Peer> peers;
-    private final Map<Question, Map<Neighbour, List<String>>> questionnaire;
+    private Questionnaire<Neighbour> questionnaire;
+    private Round<Neighbour> actualRound;
 
     public Host(Peer peer, List<Question> questions) {
         this.peer = peer;
-        this.questionnaire = new HashMap<>();
-
         this.questions = questions;
-        Collections.shuffle(this.questions);
-        peers = new HashSet<>();
+        this.participants = new HashSet<>();
     }
 
     public void start() {
         Console.println("mode host started");
 
         this.peer.listener = this;
-        this.idRound = 0;
-        this.questionnaire.clear();
-        this.peers.clear();
 
-        String[] options = new String[]{"exit", "connect", "connected", "startRound"};
+        String[] options = new String[]{"exit", "connect", "connected", "startQuestionnaire"};
         int selected = -1;
 
         while (selected != 0) {
@@ -44,14 +39,14 @@ public class Host extends PeerListener {
             switch (selected) {
                 case 1 -> peer.actionConnect();
                 case 2 -> peer.actionShowConnected();
-                case 3 -> this.startRound();
+                case 3 -> this.startQuestionnaire();
             }
         }
     }
 
-    private void startRound() {
-        this.idRound = (System.currentTimeMillis() / 1000L);
-        peer.sendRoundRequest(idRound);
+    private void startQuestionnaire() {
+        this.questionnaire = new Questionnaire<>(this.questions, this.participants);
+        this.peer.sendRoundRequest(this.questionnaire.id);
 
         String[] options = new String[]{
                 "abort",
@@ -62,10 +57,10 @@ public class Host extends PeerListener {
                 "finishRound"
         };
 
-        while (this.idRound != 0) {
+        while (this.questionnaire != null) {
             switch (Console.select("actions: ", options)) {
-                case 0 -> this.idRound = 0;
-                case 1 -> this.peer.sendRoundRequest(this.idRound);
+                case 0 -> this.questionnaire = null;
+                case 1 -> this.peer.sendRoundRequest(this.questionnaire.id);
                 case 2 -> this.sendQuestion();
                 case 3 -> this.showAnswers();
                 case 4 -> this.sendResults();
@@ -75,52 +70,52 @@ public class Host extends PeerListener {
     }
 
     private void finishRound() {
+        this.peer.sendRoundResult(this.questionnaire.getWinner());
     }
 
     private void sendResults() {
-
+        this.peer.sendAnswerResult(this.actualRound);
     }
 
     private void showAnswers() {
-        List<Question> questionsObject = new ArrayList<>();
-        List<String> questionsString = new ArrayList<>();
-        this.questionnaire.keySet().forEach(question -> {
-            questionsString.add(question.title);
-            questionsObject.add(question);
-        });
+        List<String> options = new ArrayList<>();
+        this.questions.forEach(question -> options.add(question.title));
 
-        String[] options = questionsString.toArray(new String[questionsString.size() + 1]);
-        options[questionsString.size()] = "exit";
+        options.add("exit");
 
         int selected = -1;
-        while (selected != questionsString.size()) {
+        while (selected != options.size() - 1) {
             selected = Console.selectNumber("select the question:", options);
+            if (selected == options.size() - 1) break;
 
-            Question questionSelected = questionsObject.get(selected);
+            Question questionSelected = this.questions.get(selected);
 
             Console.println("question selected[" + questionSelected.id + "]: " + questionSelected.title);
-            this.questionnaire.get(questionSelected).forEach((neighbour, answer) -> {
-                Console.println(" - " + neighbour.getAlias() + " -> " + String.join(",", answer));
+
+            this.questionnaire.getRound(questionSelected).getAnswers().forEach((neighbour, answers) -> {
+                Console.println(" - " + neighbour.getAlias() + " -> " + String.join(",", answers));
             });
         }
     }
 
     private void sendQuestion() {
-        if (this.questionnaire.size() >= this.questions.size()) this.peer.sendRoundResult(null);
+        if (this.questionnaire.hasWinner()) {
+            Console.println("finish round, winner: " + this.questionnaire.getWinner().getAlias());
+            return;
+        };
 
-        Question question = this.questions.get(this.questionnaire.size());
-        this.questionnaire.put(question, new HashMap<>());
+        this.actualRound = this.questionnaire.newRound();
 
-        this.peer.sendQuestion(question);
+        this.peer.sendQuestion(this.actualRound.question);
     }
 
     @Override
     public void cmdAnswer(Neighbour neighbour, CommandOuterClass.Answer cmd) {
-        this.questionnaire.get(this.questions.get(this.questionnaire.size() - 1)).put(neighbour, cmd.getDataList());
+        this.actualRound.response(neighbour, cmd.getDataList());
     }
 
     @Override
     void cmdRoundResponse(Neighbour neighbour, CommandOuterClass.RoundResponse cmd) {
-
+        if (cmd.getOk()) this.participants.add(neighbour);
     }
 }

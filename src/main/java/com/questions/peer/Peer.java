@@ -1,6 +1,7 @@
 package com.questions.peer;
 
 import com.questions.CommandOuterClass.*;
+import com.questions.quesionnaire.Round;
 import com.questions.red.Neighbour;
 import com.questions.red.Node;
 import com.questions.utils.Console;
@@ -61,7 +62,7 @@ public class Peer extends Node {
         Console.println("successfully");
     }
 
-    public void sendQuestion(com.questions.utils.Question question) {
+    public void sendQuestion(com.questions.quesionnaire.Question question) {
         this.sendAll(Command.newBuilder()
                 .setQuestion(Question.newBuilder()
                         .setId(question.id)
@@ -71,8 +72,18 @@ public class Peer extends Node {
         );
     }
 
-    public void sendAnswerResult() {
+    public void sendAnswerResult(Round<Neighbour> round) {
+        AnswerResult.Builder cmd = AnswerResult.newBuilder()
+                .setAliasCorrect(round.hasWinner() ? round.getWinner().getAlias() : "");
 
+        for (Neighbour peer: round.getAnswers().keySet()) {
+            cmd.addPeers(PeerResult.newBuilder()
+                    .setAlias(peer.getAlias())
+                    .addAllAnswer(round.getAnswers().get(peer))
+            );
+        }
+
+        this.sendAll(Command.newBuilder().setAnswerResult(cmd).build());
     }
 
     public void sendRoundResult(Neighbour winner) {
