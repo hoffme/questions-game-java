@@ -89,12 +89,8 @@ public class Client extends PeerListener {
         String answer = Console.input("> ");
 
         switch (cmd.getType()) {
-            case com.questions.quesionnaire.Question.TypeSimple -> {
-                this.peer.sendAnswer(this.actualHost, cmd.getId(), answer);
-            }
-            case com.questions.quesionnaire.Question.TypeMultiple -> {
-                this.peer.sendAnswer(this.actualHost, cmd.getId(), Arrays.asList(answer.split(",")));
-            }
+            case com.questions.quesionnaire.Question.TypeSimple -> this.peer.sendAnswer(this.actualHost, cmd.getId(), answer);
+            case com.questions.quesionnaire.Question.TypeMultiple -> this.peer.sendAnswer(this.actualHost, cmd.getId(), Arrays.asList(answer.split(",")));
         }
     }
 
@@ -110,5 +106,6 @@ public class Client extends PeerListener {
     @Override
     public void cmdRoundResult(Neighbour neighbour, RoundResult cmd) {
         Console.println("the winner is: " + cmd.getAliasWinner());
+        this.finishRound();
     }
 }
