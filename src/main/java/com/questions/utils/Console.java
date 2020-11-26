@@ -2,6 +2,7 @@ package com.questions.utils;
 
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Console {
@@ -44,16 +45,33 @@ public class Console {
 
     public static void println(String text) { Console.writer.println(text); }
 
-    public static int selectNumber(String title, List<String> options) {
-        while (true) {
-            Console.println(title);
-            for (int i = 0; i < options.size(); i++) Console.println("[" + i + "] " + options.get(i));
+    public static int selectWithIndex(String title, List<String> options) {
+        StringBuilder text = new StringBuilder(title);
+        for (int i = 0; i < options.size(); i++) {
+            text.append("\t[").append(i).append("] ").append(options.get(i)).append("\n");
+        }
 
-            int selected = Console.inputInt("> ", false);
+        while (true) {
+            int selected = Console.inputInt(text + "> ", false);
 
             if (selected >= 0 && selected < options.size()) return selected;
 
             Console.println("invalid option");
+        }
+    }
+
+    public static void commander(Map<String, Command> commands) {
+        while (true) {
+            String[] cmd = Console.input("cmd: ").split(" ", 2);
+
+            if (cmd[0].equals("exit")) break;
+            if (cmd[0].equals("list")) {
+                Console.println("\t> " + String.join("\n\t> ", commands.keySet()));
+                continue;
+            }
+
+            if (commands.containsKey(cmd[0])) commands.get(cmd[0]).command(cmd.length == 1 ? "" : cmd[1]);
+            else Console.println("invalid command");
         }
     }
 }

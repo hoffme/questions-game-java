@@ -51,10 +51,18 @@ public class Questionnaire<T> {
     }
 
     public boolean hasWinner() {
-        return this.getWinner() == null;
+        return this.getWinner() != null;
     }
 
     public Round<T> getRound(Question question) {
         return this.rounds.get(question);
+    }
+
+    public List<Round<T>> getRounds() {
+        return new ArrayList<>(this.rounds.values());
+    }
+
+    public void forceWinner() {
+
     }
 }

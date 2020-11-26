@@ -18,8 +18,8 @@ public class Peer extends Node {
         super(username, host, port);
     }
 
-    public void actionConnect() {
-        String[] peers = Console.input("> ").replaceAll("\\s+","").split(",");
+    public void actionConnect(String args) {
+        String[] peers = args.replaceAll("\\s+","").split(",");
         for (String peer: peers) {
             Console.print("connecting " + peer + " -> ");
             try {

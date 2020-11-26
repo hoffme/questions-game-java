@@ -83,7 +83,7 @@ public class Config {
             try {
                 this.loadQuestions();
                 break;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Console.println("error on load questions: " + e.getMessage());
             }
         }
